@@ -75,7 +75,7 @@
   .row { display: flex; flex-wrap: wrap; gap: 14px; margin: 10px 0; }
   .col { flex: 1 1 210px; min-width: 200px; }
   label { display: block; font-size: 14px; margin-bottom: 6px; opacity: .85; }
-  select, button { width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.2); background: rgba(0,0,0,.35); color: var(--text); font-weight: 700; }
+  select, button, input { width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.2); background: rgba(0,0,0,.35); color: var(--text); font-weight: 700; }
   button.cta { background: linear-gradient(135deg, #8b5cf6, #06b6d4); border: none; cursor: pointer; transition: transform .06s ease; }
   button.cta:active { transform: translateY(2px) scale(0.99); }
   .hint { opacity: .78; font-size: 12px; margin-top: 6px; }
@@ -121,38 +121,12 @@
     .btn { width: 44px; height: 44px; font-size: 18px; }
   }
 
-  /* NEW: hint bar + skip tutorial */
-  #hintBar {
-    position: absolute;
-    left: 50%;
-    bottom: calc(env(safe-area-inset-bottom) + 64px);
-    transform: translateX(-50%);
-    background: linear-gradient(160deg, var(--ui-glass-a), var(--ui-glass-b));
-    border: 1px solid var(--hud-border);
-    border-radius: 999px;
-    padding: 10px 14px;
-    font-weight: 800;
-    text-shadow: 0 2px 4px rgba(0,0,0,.5);
-    box-shadow: 0 10px 24px rgba(0,0,0,.35);
-    opacity: 0; pointer-events: none; transition: opacity .2s ease;
-    max-width: 92%;
-  }
-  #hintBar.show { opacity: 1; }
-
-  #skipTutor {
-    position: absolute;
-    top: calc(env(safe-area-inset-top) + 10px);
-    right: calc(env(safe-area-inset-right) + 10px);
-    background: rgba(0,0,0,.4);
-    border: 1px solid var(--hud-border);
-    color: var(--text);
-    border-radius: 10px;
-    padding: 6px 10px;
-    font-weight: 800;
-    display: none;
-  }
-  #skipTutor.show { display: block; }
-
+  /* Leaderboard */
+  #lbOverlay .card { width: min(96%, 760px); }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { text-align: left; font-size: 13px; opacity: 0.8; padding: 8px 6px; border-bottom: 1px solid rgba(255,255,255,.12); }
+  tbody td { padding: 8px 6px; border-bottom: 1px solid rgba(255,255,255,.06); }
+  .mono { font-family: ui-monospace, Menlo, Consolas, monospace; }
 </style>
 </head>
 <body>
@@ -222,33 +196,11 @@
             </select>
           </div>
         </div>
-        <div class="row">
+        <div class="row" style="align-items:center;">
           <div class="col" style="max-width:220px;"><button id="startBtn" class="cta">Start</button></div>
+          <div class="col" style="max-width:220px;"><button id="leaderBtn" class="cta" style="background:linear-gradient(135deg,#10b981,#22c55e);">Leaderboard</button></div>
         </div>
-        <div class="hint">Mobile: Right tap = Jump ⬆ • Left tap = Power ⚡ • Two‑finger = Pause ⏸</div>
-      </div>
-    </div>
-
-    <!-- How to Play (first-run) -->
-    <div class="overlay" id="helpOverlay" style="display:none;">
-      <div class="card">
-        <h2 style="margin:0 0 10px;">How to Play</h2>
-        <div class="row" style="margin-top:8px;">
-          <div class="col">
-            <div class="pill" style="display:inline-flex;align-items:center;gap:8px;">⬆ Jump <span style="opacity:.8;font-weight:600">Right tap • Space/Up</span></div>
-          </div>
-          <div class="col">
-            <div class="pill" style="display:inline-flex;align-items:center;gap:8px;">⚡ Power <span style="opacity:.8;font-weight:600">Left tap • F</span></div>
-          </div>
-          <div class="col">
-            <div class="pill" style="display:inline-flex;align-items:center;gap:8px;">⏸ Pause <span style="opacity:.8;font-weight:600">Two‑finger • P</span></div>
-          </div>
-        </div>
-        <div class="hint" style="margin-top:10px;">Collect glowing orbs to gain Energy. Use your hero’s power. Avoid obstacles. During boss fights, dodge red shots and collect blue cores to damage the boss.</div>
-        <div class="row" style="justify-content:center;margin-top:14px;">
-          <div class="col" style="max-width:220px;"><button id="helpTutorBtn" class="cta">Start Tutorial</button></div>
-          <div class="col" style="max-width:220px;"><button id="helpPlayBtn" class="cta" style="background:linear-gradient(135deg,#10b981,#22c55e);">Play Now</button></div>
-        </div>
+        <div class="hint">Mobile: Right tap = Jump • Left tap = Power • Two‑finger = Pause</div>
       </div>
     </div>
 
@@ -258,9 +210,18 @@
         <h2 style="margin:0 0 10px;">Game Over</h2>
         <div style="margin:6px 0;">Score: <b id="finalScore">0</b> • Best: <b id="bestScore">0</b></div>
         <div class="row" style="justify-content:center;">
+          <div class="col">
+            <label for="playerName">Your name</label>
+            <input id="playerName" maxlength="16" placeholder="Player123" />
+          </div>
+        </div>
+        <div class="row" style="justify-content:center;">
+          <div class="col" style="max-width:220px;"><button id="saveScoreBtn" class="cta">Save Score</button></div>
           <div class="col" style="max-width:220px;"><button id="retryBtn" class="cta">Retry</button></div>
           <div class="col" style="max-width:220px;"><button id="menuBtn" class="cta" style="background:linear-gradient(135deg,#10b981,#22c55e);">Menu</button></div>
+          <div class="col" style="max-width:220px;"><button id="overLBBtn" class="cta" style="background:linear-gradient(135deg,#f59e0b,#ef4444);">Leaderboard</button></div>
         </div>
+        <div id="saveMsg" class="hint" style="min-height:18px; margin-top:4px;"></div>
       </div>
     </div>
 
@@ -277,9 +238,26 @@
       </div>
     </div>
 
-    <!-- Guided hint + Skip -->
-    <div id="hintBar"><span id="hintText"></span></div>
-    <button id="skipTutor">Skip tutorial</button>
+    <!-- Leaderboard Overlay -->
+    <div class="overlay" id="lbOverlay" style="display:none;">
+      <div class="card">
+        <h2 style="margin:0 0 10px;">Leaderboard</h2>
+        <div class="hint" id="lbStatus" style="margin-bottom:8px;">Fetching top scores…</div>
+        <div style="max-height:48vh; overflow:auto; border:1px solid rgba(255,255,255,.1); border-radius:12px;">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Name</th><th class="mono">Score</th><th class="mono">When</th></tr>
+            </thead>
+            <tbody id="lbBody"></tbody>
+          </table>
+        </div>
+        <div class="row" style="justify-content:center; margin-top:12px;">
+          <div class="col" style="max-width:220px;"><button id="lbRefresh" class="cta">Refresh</button></div>
+          <div class="col" style="max-width:220px;"><button id="lbClose" class="cta" style="background:linear-gradient(135deg,#10b981,#22c55e);">Close</button></div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -291,13 +269,12 @@
 
   // UI
   const menuOverlay = document.getElementById('menuOverlay');
-  const helpOverlay = document.getElementById('helpOverlay');
   const gameOverOverlay = document.getElementById('gameOverOverlay');
   const startBtn = document.getElementById('startBtn');
-  const helpTutorBtn = document.getElementById('helpTutorBtn');
-  const helpPlayBtn = document.getElementById('helpPlayBtn');
   const retryBtn = document.getElementById('retryBtn');
   const menuBtn = document.getElementById('menuBtn');
+  const leaderBtn = document.getElementById('leaderBtn');
+  const overLBBtn = document.getElementById('overLBBtn');
 
   const gradeSel = document.getElementById('grade');
   const heroSel = document.getElementById('hero');
@@ -322,14 +299,18 @@
   const powerCDMask = document.getElementById('powerCD');
   const touchControls = document.getElementById('touchControls');
 
-  // Hints + tutorial
-  const hintBar = document.getElementById('hintBar');
-  const hintText = document.getElementById('hintText');
-  const skipTutorBtn = document.getElementById('skipTutor');
-  const HELP_KEY = 'heroDashHelpSeenV2';
-  let hasSeenHelp = localStorage.getItem(HELP_KEY) === '1';
-
   const isTouch = matchMedia('(hover: none) and (pointer: coarse)').matches;
+
+  // Leaderboard controls
+  const nameInput = document.getElementById('playerName');
+  const saveBtn = document.getElementById('saveScoreBtn');
+  const saveMsg = document.getElementById('saveMsg');
+
+  const lbOverlay = document.getElementById('lbOverlay');
+  const lbBody = document.getElementById('lbBody');
+  const lbStatus = document.getElementById('lbStatus');
+  const lbRefresh = document.getElementById('lbRefresh');
+  const lbClose = document.getElementById('lbClose');
 
   // Fullscreen helpers
   function isFS(){ return !!(document.fullscreenElement || document.webkitFullscreenElement); }
@@ -350,7 +331,7 @@
   document.addEventListener('pointerdown', ()=>{ if(!isFS()) enterFullscreen(); }, { passive:true });
   document.addEventListener('fullscreenchange', ()=>{ setTimeout(()=>{ window.scrollTo(0,0); }, 50); });
 
-  // Color themes
+  // Themes
   const themes = {
     rainbow: { obsA: '#facc15', obsB: '#f97316', skyA:'#3b82f6', skyB:'#9333ea', orb:'#f59e0b' },
     ocean:   { obsA: '#7dd3fc', obsB: '#0ea5e9', skyA:'#0369a1', skyB:'#0b1020', orb:'#8b5cf6' },
@@ -374,7 +355,8 @@
       hit(){ if(!ac) return; const t=ac.currentTime; const o=ac.createOscillator(), g=ac.createGain(); o.type='square'; o.connect(g); g.connect(sfx); o.frequency.setValueAtTime(140,t); env(g,t,0.004,0.16); o.start(t); o.stop(t+0.18); },
       boss(){ beep('triangle',220,180,0.4); },
       win(){ beep('square',660,990,0.4); },
-      pause(){ beep('square',320,320,0.07); }
+      pause(){ beep('square',320,320,0.07); },
+      warn(){ if(!ac) return; const t=ac.currentTime; const o=ac.createOscillator(), g=ac.createGain(); o.type='triangle'; o.connect(g); g.connect(sfx); g.gain.setValueAtTime(.0001,t); g.gain.linearRampToValueAtTime(.2,t+.01); g.gain.exponentialRampToValueAtTime(.0001,t+.12); o.frequency.setValueAtTime(420,t); o.frequency.exponentialRampToValueAtTime(620,t+.08); o.start(t); o.stop(t+.14); }
     };
   })();
 
@@ -392,22 +374,28 @@
   // Entities
   const player = { x:120,y:0,w:44,h:60,vx:0,vy:0,onGround:false,doubleJump:false,powerCD:0, slowTime:0,dash:0,shield:0 };
   const bullets=[], obstacles=[], orbs=[], fxBursts=[];
-  const boss = { active:false, hp:0, maxHp:0, x:0,y:0,w:140,h:100,t:0, fireTimer:0, coreTimer:0 };
+  const boss = { active:false, hp:0, maxHp:0, x:0,y:0,w:140,h:100,t:0, fireTimer:0, coreTimer:0, lastBand:-1, intro:0, fireInterval:0, coreInterval:0 };
   const bossShots=[], bossCores=[];
   let tPrev=0, obstacleTimer=0, orbTimer=0;
   const bgState={ t:0, cityFar:0, cityNear:0, starsA:0, starsB:0, jungleFar:0, jungleNear:0 };
 
-  // Jump fairness
-  let coyote=0, jumpBuffer=0;
-  const COYOTE_MAX = 0.12, BUFFER_MAX = 0.15, SAFE_START = 2.0;
-  let timeSinceStart = 0;
+  // Mobile Grade 3 assist flag
+  let assistG3 = false;
+
+  // Boss fairness constants
+  const BOSS_SMART = { intro: 1.2, minTimeToHero: 0.75, minLaneCooldown: 0.8, minDistFromHeroX: 170 };
+  const BOSS_SMART_EASY = { intro: 2.2, minTimeToHero: 1.1, minLaneCooldown: 1.2, minDistFromHeroX: 220 };
+
+  // Jump fairness (tunable)
+  const COYOTE_DEF = 0.12, BUFFER_DEF = 0.15, SAFE_DEF = 2.0;
+  let COYOTE_MAX = COYOTE_DEF, BUFFER_MAX = BUFFER_DEF, SAFE_START = SAFE_DEF;
 
   // Wake Lock
   let wakeLock = null;
   async function requestWakeLock(){ try{ if('wakeLock' in navigator){ wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', ()=>{ wakeLock=null; }); } }catch(e){} }
   function releaseWakeLock(){ if(wakeLock){ wakeLock.release(); wakeLock=null; } }
 
-  // Dynamic resolution scaling for smooth 60fps
+  // Dynamic resolution scaling
   let renderScale = 1.0;
   let rawDPR = window.devicePixelRatio || 1;
   let fpsAccum = 0, fpsFrames = 0, fpsLow = false;
@@ -443,16 +431,29 @@
   // Utils
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   function rand(seed){ const x=Math.sin(seed*12.9898)*43758.5453; return x-Math.floor(x); }
+
   function difficultyFromGrade(g){
     const t=(g-3)/6;
-    return {
+    const base = {
       speedMul: 0.9 + t*0.7,
       obstacleEvery: 1.0 - t*0.45,
       orbEvery: 0.9 + t*0.5,
       bossHP: 8 + Math.round(t*8),
       reactTime: 1.05 - t*0.35
     };
+    // Mobile Grade 3 friendly tuning (more reaction, fewer obstacles, more orbs, slightly slower scroll)
+    if (assistG3) {
+      return {
+        speedMul: Math.max(0.7, base.speedMul * 0.82),
+        obstacleEvery: base.obstacleEvery * 1.35,
+        orbEvery: Math.max(0.55, base.orbEvery * 0.7),
+        bossHP: base.bossHP,     // keep HP, patterns get easier instead
+        reactTime: base.reactTime + 0.35
+      };
+    }
+    return base;
   }
+
   function perfDetail(){
     if(state.perf==='low') return 0;
     if(state.perf==='high') return 2;
@@ -478,7 +479,7 @@
   // Drawing basics
   function drawRoundedRect(x,y,w,h,r){ ctx.beginPath(); r=Math.min(r,w/2,h/2); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 
-  // Backgrounds (detail-aware)
+  // Backgrounds
   function drawBackground(dt, spd, detail){
     const W=canvas.width, H=canvas.height, ground=state.groundY;
     if(state.bg==='city'){
@@ -577,8 +578,24 @@
     ctx.fillStyle='rgba(255,255,255,.14)'; drawRoundedRect(x+8,y+h*0.5,w-16,h*0.42,10); ctx.fill();
   }
   function drawBossShots(){
-    for(const s of bossShots){ ctx.fillStyle='#ef4444'; drawRoundedRect(s.x,s.y,s.w,s.h,3); ctx.fill(); }
-    for(const c of bossCores){ ctx.fillStyle='rgba(99,102,241,.25)'; ctx.beginPath(); ctx.arc(c.x,c.y,c.r+6,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#6366f1'; ctx.beginPath(); ctx.arc(c.x,c.y,c.r,0,Math.PI*2); ctx.fill(); }
+    for(const s of bossShots){
+      if (s.warm > 0){
+        const pulse = 0.55 + 0.45*Math.sin((bgState.t*9)%6.283);
+        ctx.strokeStyle = `rgba(239,68,68,${0.35 + 0.4*pulse})`;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(boss.x - 18, s.y + s.h/2);
+        ctx.lineTo(boss.x + 12, s.y + s.h/2);
+        ctx.stroke();
+      } else {
+        ctx.fillStyle='#ef4444';
+        drawRoundedRect(s.x,s.y,s.w,s.h,3); ctx.fill();
+      }
+    }
+    for(const c of bossCores){
+      ctx.fillStyle='rgba(99,102,241,.25)'; ctx.beginPath(); ctx.arc(c.x,c.y,c.r+6,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#6366f1'; ctx.beginPath(); ctx.arc(c.x,c.y,c.r,0,Math.PI*2); ctx.fill();
+    }
   }
 
   // FX
@@ -621,17 +638,35 @@
     const x= canvas.width + 20 + Math.random()*120;
     orbs.push({ x, y, r:10, pulse:0 });
   }
-  function spawnOrbNear(){
-    const y= state.groundY - 120;
-    const x= Math.min(canvas.width - 60, player.x + player.w + 220);
-    orbs.push({ x, y, r:10, pulse:0 });
+
+  // Boss lanes
+  function pickBossShotY(){
+    const lowY = state.groundY - 22;                             // jump over
+    const highY = Math.max(16, state.groundY - player.h - 46);   // stay grounded
+    const midY = state.groundY - Math.round(player.h*0.6);       // harder
+    const prefer = player.onGround ? 1 : 0; // ground -> prefer high, air -> prefer low
+    const candidates = [prefer, 1 - prefer, 2];
+    for (const band of candidates){
+      if ((pickBossShotY.laneCD && pickBossShotY.laneCD[band]||0) <= 0){
+        let y = lowY;
+        if (band === 1) y = highY; else if (band === 2) y = midY;
+        return { y, band };
+      }
+    }
+    return { y: highY, band: 1 };
   }
+  pickBossShotY.laneCD = [0,0,0];
 
   // Boss
   function spawnBoss(){
     const { bossHP } = difficultyFromGrade(state.grade);
     boss.active=true; boss.hp=bossHP; boss.maxHp=bossHP;
-    boss.x=canvas.width - 180; boss.y=state.groundY - boss.h - 60; boss.t=0; boss.fireTimer=0.7; boss.coreTimer=1.3;
+    boss.x=canvas.width - 180; boss.y=state.groundY - boss.h - 60; boss.t=0;
+    boss.fireInterval = assistG3 ? 1.2 : 0.95;
+    boss.coreInterval = assistG3 ? 1.4 : 1.6;
+    boss.fireTimer=boss.fireInterval; boss.coreTimer=boss.coreInterval; boss.lastBand=-1;
+    boss.intro = (assistG3 ? BOSS_SMART_EASY : BOSS_SMART).intro;
+    pickBossShotY.laneCD = [0,0,0];
     bossShots.length=0; bossCores.length=0; bossBar.style.display='block'; SFX.boss();
   }
   function endBoss(defeated){
@@ -662,7 +697,7 @@
 
   function bufferJump(){ jumpBuffer = BUFFER_MAX; }
 
-  // Canvas gestures
+  // Canvas gestures (Left tap = Power, Right tap = Jump, Two-finger = Pause)
   function getCanvasPoint(ev){
     const rect = canvas.getBoundingClientRect();
     if (ev.touches && ev.touches.length>0) {
@@ -692,80 +727,17 @@
     controlsTimer = setTimeout(()=>touchControls.classList.remove('show'), seconds*1000);
   }
 
-  // Hints
-  let hintTimer = 0;
-  function setHint(msg, persist=false, seconds=3){
-    hintText.textContent = msg;
-    hintBar.classList.add('show');
-    if (hintTimer) clearTimeout(hintTimer);
-    if (!persist){
-      hintTimer = setTimeout(()=>{ hintBar.classList.remove('show'); }, seconds*1000);
-    }
-  }
-  function clearHint(){
-    if (hintTimer) clearTimeout(hintTimer);
-    hintBar.classList.remove('show');
-  }
-
-  // Tutorial
-  const tutorial = { active:false, step:0 };
-  function startTutorial(){
-    tutorial.active = true; tutorial.step = 0;
-    skipTutorBtn.classList.add('show');
-    showControlsAuto(999);
-    // Steps guide
-    setHint('Tap right side to Jump ⬆', true);
-    // give energy for power step later
-    state.energy = Math.max(state.energy, 2);
-  }
-  function endTutorial(){
-    tutorial.active = false;
-    skipTutorBtn.classList.remove('show');
-    clearHint();
-    touchControls.classList.remove('show');
-  }
-  skipTutorBtn.addEventListener('click', ()=> endTutorial());
-
-  function onDidJump(){
-    if (tutorial.active && tutorial.step===0){
-      tutorial.step=1;
-      setHint('Tap left side for your Power ⚡', true);
-    }
-  }
-  function onDidPower(){
-    if (tutorial.active && tutorial.step===1){
-      tutorial.step=2;
-      setHint('Two‑finger tap anywhere to Pause ⏸ (tap again to resume)', true);
-    }
-  }
-  function onDidPause(){
-    if (tutorial.active && tutorial.step===2){
-      tutorial.step=3;
-      setHint('Collect an orb to gain Energy 🟡', true);
-      spawnOrbNear();
-    } else if (tutorial.active && tutorial.step===3){
-      // resume also ok
-    }
-  }
-  function onDidCollectOrb(){
-    if (tutorial.active && tutorial.step===3){
-      tutorial.step=4;
-      setHint('Nice! You\'re ready. Run, collect, and avoid obstacles. Good luck!', false, 4);
-      endTutorial();
-    }
-  }
-
   // Actions
   function tryJumpImmediate(){
     if (player.onGround || coyote > 0) {
       player.vy = -Math.max(720, canvas.height*0.90);
       player.onGround = false; player.doubleJump = false; jumpBuffer = 0; coyote = 0;
-      SFX.jump(); onDidJump();
+      SFX.jump();
       return true;
     } else if (state.hero==='web' && !player.doubleJump) {
       player.vy = -Math.max(680, canvas.height*0.85);
       player.doubleJump = true; jumpBuffer = 0;
-      SFX.jump(); onDidJump();
+      SFX.jump();
       return true;
     }
     return false;
@@ -776,19 +748,18 @@
     const can=n=>state.energy >= n, spend=n=>state.energy = clamp(state.energy - n, 0, state.maxEnergy);
     if (player.powerCD > 0) return;
 
-    let used=false;
     if (state.hero==='tech') {
       if (can(1)) {
         spend(1);
         bullets.push({ x: player.x+player.w+6, y: player.y+player.h*0.45, w:18,h:6, vx:860, life:1.2 });
-        player.powerCD = 0.18; SFX.shoot(); used=true;
+        player.powerCD = 0.18; SFX.shoot();
       }
     } else if (state.hero==='web') {
-      player.slowTime = 0.7; player.powerCD = 1.2; SFX.pause(); used=true;
+      player.slowTime = 0.7; player.powerCD = 1.2; SFX.pause();
     } else if (state.hero==='bolt') {
-      if (can(2)) { spend(2); player.dash = 0.5; player.powerCD = 0.7; SFX.pause(); fxBursts.push({ x:player.x+player.w*0.6, y:player.y+player.h*0.6, t:0,r:10 }); used=true; }
+      if (can(2)) { spend(2); player.dash = 0.5; player.powerCD = 0.7; SFX.pause(); fxBursts.push({ x:player.x+player.w*0.6, y:player.y+player.h*0.6, t:0,r:10 }); }
     } else if (state.hero==='shield') {
-      if (can(3) && player.shield<=0) { spend(3); player.shield = 8.0; player.powerCD = 0.4; SFX.pause(); used=true; }
+      if (can(3) && player.shield<=0) { spend(3); player.shield = 8.0; player.powerCD = 0.4; SFX.pause(); }
     } else if (state.hero==='mage') {
       if (can(2)) {
         spend(2); player.powerCD = 0.6;
@@ -803,13 +774,12 @@
           const cx=player.x+player.w*0.5, cy=player.y+player.h*0.5, bx=boss.x+boss.w*0.5, by=boss.y+boss.h*0.5;
           const dx=bx-cx, dy=by-cy; if(dx*dx+dy*dy <= (R + Math.max(boss.w,boss.h))**2) damageBoss(2);
         }
-        SFX.shoot(); used=true;
+        SFX.shoot();
       }
     }
-    if (used) onDidPower();
   }
 
-  function togglePause(){ if(!state.running) return; state.paused = !state.paused; SFX.pause(); if(state.paused) showControlsAuto(999); onDidPause(); }
+  function togglePause(){ if(!state.running) return; state.paused = !state.paused; SFX.pause(); if(state.paused) showControlsAuto(999); }
 
   // Reset/Start/GameOver
   function resetGame(){
@@ -824,25 +794,32 @@
     obstacleTimer=0; orbTimer=0; timeSinceStart=0; coyote=0; jumpBuffer=0;
 
     state.score=0; state.lives=state.maxLives; state.energy=2;
-    state.invTime=0; state.timeScale=1; boss.active=false; boss.hp=0; boss.maxHp=0; boss.t=0; boss.fireTimer=0; boss.coreTimer=0;
+    state.invTime=0; state.timeScale=1; boss.active=false; boss.hp=0; boss.maxHp=0; boss.t=0; boss.fireTimer=0; boss.coreTimer=0; boss.lastBand=-1; boss.intro=0;
     state.nextBossAt = 260; bossBar.style.display='none';
   }
 
   async function startGame(){
-    state.grade = parseInt(gradeSel.value,10);
+    state.grade = Math.max(3, Math.min(9, parseInt(gradeSel.value,10)||3));
     state.hero = heroSel.value;
     state.bg = bgSel.value;
     state.perf = perfSel.value;
     palette = themes[themeSel.value] || themes.rainbow;
 
+    // Mobile Grade 3 assist
+    assistG3 = isTouch && state.grade === 3;
+    COYOTE_MAX = assistG3 ? 0.18 : COYOTE_DEF;
+    BUFFER_MAX = assistG3 ? 0.22 : BUFFER_DEF;
+    SAFE_START = assistG3 ? 3.2 : SAFE_DEF;
+
     gradeHUD.textContent = String(state.grade);
-    menuOverlay.style.display='none'; gameOverOverlay.style.display='none'; helpOverlay.style.display='none';
+    menuOverlay.style.display='none'; gameOverOverlay.style.display='none';
     state.running=true; state.paused=false;
     SFX.ensure();
     await enterFullscreen();
     requestWakeLock();
     resizeCanvas();
     resetGame();
+    if (isTouch) showControlsAuto(2.5);
   }
 
   function gameOver(){
@@ -855,25 +832,13 @@
     SFX.hit();
     releaseWakeLock();
     touchControls.classList.remove('show');
-    endTutorial();
+    // prefill name
+    const savedName = localStorage.getItem('hdName') || '';
+    nameInput.value = savedName || defaultPlayerName();
+    saveMsg.textContent = '';
   }
 
-  // Start buttons with first-run help
-  startBtn.addEventListener('click', ()=>{
-    if (!hasSeenHelp) {
-      helpOverlay.style.display='grid';
-    } else {
-      startGame().then(()=>{ if (isTouch) setHint('Right = Jump ⬆ • Left = Power ⚡ • Two‑finger = Pause ⏸', false, 4); showControlsAuto(3); });
-    }
-  });
-  helpTutorBtn.addEventListener('click', ()=>{
-    hasSeenHelp = true; localStorage.setItem(HELP_KEY, '1');
-    startGame().then(()=>{ startTutorial(); });
-  });
-  helpPlayBtn.addEventListener('click', ()=>{
-    hasSeenHelp = true; localStorage.setItem(HELP_KEY, '1');
-    startGame().then(()=>{ if (isTouch) setHint('Right = Jump ⬆ • Left = Power ⚡ • Two‑finger = Pause ⏸', false, 4); showControlsAuto(3); });
-  });
+  startBtn.addEventListener('click', ()=>{ SFX.ensure(); startGame(); });
   retryBtn.addEventListener('click', ()=>{ gameOverOverlay.style.display='none'; startGame(); });
   menuBtn.addEventListener('click', ()=>{ gameOverOverlay.style.display='none'; menuOverlay.style.display='grid'; state.running=false; releaseWakeLock(); touchControls.classList.remove('show'); });
 
@@ -884,6 +849,8 @@
   });
 
   // Update and Render
+  let timeSinceStart = 0;
+  let coyote=0, jumpBuffer=0;
   function update(dt){
     const { speedMul, obstacleEvery, orbEvery } = difficultyFromGrade(state.grade);
     const spd = state.baseSpeed * speedMul;
@@ -894,6 +861,9 @@
     if (player.shield>0) player.shield-=dt;
     if (player.powerCD>0) player.powerCD-=dt;
     if (jumpBuffer>0) jumpBuffer -= dt;
+    pickBossShotY.laneCD[0] = Math.max(0, (pickBossShotY.laneCD[0]||0)-dt);
+    pickBossShotY.laneCD[1] = Math.max(0, (pickBossShotY.laneCD[1]||0)-dt);
+    pickBossShotY.laneCD[2] = Math.max(0, (pickBossShotY.laneCD[2]||0)-dt);
     bgState.t += dt;
 
     player.vy += state.gravity * dt;
@@ -914,11 +884,11 @@
 
     if (!boss.active) {
       obstacleTimer += dt;
-      // Give extra safe time during tutorial
-      const safe = tutorial.active ? SAFE_START + 999 : SAFE_START;
+      const safe = SAFE_START;
       if (timeSinceStart > safe && obstacleTimer >= obstacleEvery) {
         obstacleTimer = 0;
-        spawnObstacleFair(spd);
+        // For mobile Grade 3, cap concurrent obstacles on screen
+        if (!assistG3 || obstacles.length < 2) spawnObstacleFair(spd);
       }
     }
     orbTimer += dt;
@@ -931,10 +901,7 @@
       const o=obstacles[i]; o.x -= scroll;
       if (player.dash>0 && rectsOverlap(hb, o)) { obstacles.splice(i,1); state.score += 8; continue; }
       if (rectsOverlap(hb, o)) {
-        if (tutorial.active) {
-          // No damage in tutorial, just bounce a bit
-          player.vy = -420; state.invTime = 0.3;
-        } else if (state.invTime<=0) {
+        if (state.invTime<=0) {
           if (player.shield>0) { player.shield=0; state.invTime=0.6; SFX.hit(); }
           else { state.lives -= 1; state.invTime = 1.0; player.vy = -460; SFX.hit(); if (state.lives <= 0) return gameOver(); }
         }
@@ -945,7 +912,7 @@
     for (let i=orbs.length-1;i>=0;i--){
       const o=orbs[i]; o.x -= scroll;
       if (circleRectOverlap(o.x,o.y,o.r+2, hb.x,hb.y,hb.w,hb.h)) {
-        state.score += 5; state.energy = clamp(state.energy + 1, 0, state.maxEnergy); orbs.splice(i,1); SFX.orb(); onDidCollectOrb();
+        state.score += 5; state.energy = clamp(state.energy + 1, 0, state.maxEnergy); orbs.splice(i,1); SFX.orb();
       } else if (o.x < -20) orbs.splice(i,1);
     }
 
@@ -957,36 +924,66 @@
       if (hit || b.life<=0 || b.x > canvas.width + 60) bullets.splice(i,1);
     }
 
+    // Boss logic (smart, with easier patterns on mobile G3)
     if (!boss.active && state.score >= state.nextBossAt) spawnBoss();
     if (boss.active) {
       boss.t += dt; boss.y += Math.sin(boss.t*1.8)*20*dt;
+
+      const smart = assistG3 ? BOSS_SMART_EASY : BOSS_SMART;
+      const liveShots = bossShots.filter(s=>s.warm<=0).length;
+      const maxLiveNow = boss.intro>0 ? 1 : (assistG3 ? 1 : 3);
+
       boss.fireTimer -= dt;
       if (boss.fireTimer <= 0) {
-        boss.fireTimer = 1.0 - Math.min(0.45, state.grade*0.05);
-        bossShots.push({ x: boss.x, y: boss.y + boss.h*(0.3+Math.random()*0.5), w:18,h:6, vx: - (140 + Math.random()*120) });
+        if (liveShots < maxLiveNow) {
+          const lane = pickBossShotY();
+          const speed = - (assistG3 ? (110 + Math.random()*100) : (140 + Math.random()*140));
+          const distX = (boss.x - 24) - (player.x + player.w);
+          const timeMove = Math.max(0, distX / Math.max(60, -speed));
+          let warm = Math.max(0.35, smart.minTimeToHero - timeMove);
+          if (distX < smart.minDistFromHeroX) warm += 0.25;
+          bossShots.push({ x: boss.x, y: lane.y, w:18,h:6, vx: speed, warm, band: lane.band });
+          pickBossShotY.laneCD[lane.band] = smart.minLaneCooldown;
+          SFX.warn();
+        }
+        boss.fireTimer = boss.fireInterval;
       }
-      boss.coreTimer -= dt;
-      if (boss.coreTimer <= 0) { boss.coreTimer = 1.9; bossCores.push({ x: boss.x-20, y: boss.y + 20 + Math.random()*(boss.h-40), r:12, vx:-120 }); }
 
+      boss.coreTimer -= dt;
+      if (boss.coreTimer <= 0) {
+        boss.coreTimer = boss.coreInterval;
+        bossCores.push({ x: boss.x-20, y: boss.y + 20 + Math.random()*(boss.h-40), r:12, vx:-120 });
+      }
+
+      // Move shots
       for (let i=bossShots.length-1;i>=0;i--){
-        const s=bossShots[i]; s.x += s.vx * dt;
-        if (rectsOverlap(hb, s)) {
+        const s=bossShots[i];
+        if (s.warm > 0){ s.warm -= dt; }
+        else { s.x += s.vx * dt; }
+        if (s.warm <= 0 && rectsOverlap(hb, {x:s.x,y:s.y,w:s.w,h:s.h})) {
           if (player.dash>0) { bossShots.splice(i,1); continue; }
           if (player.shield>0) { player.shield=0; bossShots.splice(i,1); state.invTime=0.5; SFX.hit(); continue; }
           if (state.invTime<=0) { state.lives -= 1; state.invTime=1.0; bossShots.splice(i,1); SFX.hit(); if (state.lives<=0) return gameOver(); }
           else bossShots.splice(i,1);
         } else if (s.x < -40) bossShots.splice(i,1);
       }
+
+      // Move cores
       for (let i=bossCores.length-1;i>=0;i--){
         const c=bossCores[i]; c.x += c.vx * dt;
         if (circleRectOverlap(c.x,c.y,c.r+2, hb.x,hb.y,hb.w,hb.h)) { damageBoss(1); bossCores.splice(i,1); state.score += 6; SFX.orb(); }
         else if (c.x < -30) bossCores.splice(i,1);
       }
+
+      // Body collision
       if (rectsOverlap(hb, {x:boss.x,y:boss.y,w:boss.w,h:boss.h})) {
         if (player.dash>0) damageBoss(1);
         else if (player.shield>0) { player.shield=0; state.invTime=0.6; SFX.hit(); }
         else if (state.invTime<=0) { state.lives -= 1; state.invTime=1.0; player.vy=-420; SFX.hit(); if (state.lives<=0) return gameOver(); }
       }
+
+      if (boss.intro>0) boss.intro -= dt;
+
       bossFill.style.width = ((boss.hp/boss.maxHp)*100)+'%';
       if (boss.hp>0 && state.score > state.nextBossAt + 500) endBoss(false);
     }
@@ -997,6 +994,7 @@
     scoreHUD.textContent = String(Math.floor(state.score));
     lifeFill.style.width = `${Math.max(0, (state.lives/state.maxLives)*100)}%`;
     energyFill.style.width = `${Math.max(0, (state.energy/state.maxEnergy)*100)}%`;
+
     const cd = clamp(player.powerCD / 1.2, 0, 1);
     powerCDMask.style.setProperty('--cool', (cd*100)+'%');
   }
@@ -1043,6 +1041,112 @@
     render(dt * state.timeScale);
     requestAnimationFrame(loop);
   }
+
+  // Leaderboard (Firebase Realtime Database REST)
+  const DB_BASE = 'https://math-genius-sri-lanka-default-rtdb.firebaseio.com/heroDashColor';
+  const FALLBACK = [
+    { name:'NovaRider', score: 1680, ts: Date.now()-1000*60*60*24*2 },
+    { name:'ShadowX',   score: 1540, ts: Date.now()-1000*60*60*36 },
+    { name:'EchoZen',   score: 1430, ts: Date.now()-1000*60*60*12 },
+    { name:'CometKid',  score: 1320, ts: Date.now()-1000*60*60*6 },
+    { name:'Vortex99',  score: 1210, ts: Date.now()-1000*60*60*3 },
+    { name:'BoltByte',  score: 1100, ts: Date.now()-1000*60*60*2 },
+    { name:'PixL',      score:  980, ts: Date.now()-1000*60*45 },
+    { name:'Saber',     score:  910, ts: Date.now()-1000*60*30 },
+    { name:'Orbit',     score:  850, ts: Date.now()-1000*60*20 },
+    { name:'Blaze',     score:  780, ts: Date.now()-1000*60*10 }
+  ];
+
+  function ago(ts){
+    const s = Math.max(1, Math.floor((Date.now()-ts)/1000));
+    if (s<60) return s+'s';
+    const m=Math.floor(s/60); if(m<60) return m+'m';
+    const h=Math.floor(m/60); if(h<24) return h+'h';
+    const d=Math.floor(h/24); return d+'d';
+  }
+
+  async function loadLeaderboard(){
+    lbStatus.textContent = 'Fetching top scores…';
+    try {
+      const r = await fetch(`${DB_BASE}/leaderboard.json`);
+      if (!r.ok) throw new Error('network');
+      const data = await r.json();
+      let arr = [];
+      if (data && typeof data === 'object'){
+        for (const k in data){
+          const e = data[k] || {};
+          if (typeof e.score === 'number' && e.name) arr.push({ id:k, name: String(e.name).slice(0,16), score: e.score|0, ts: e.ts||0 });
+        }
+      }
+      if (arr.length === 0) {
+        lbStatus.textContent = 'Showing sample scores (no online scores yet).';
+        updateLBUI(FALLBACK);
+        return;
+      }
+      arr.sort((a,b)=>b.score-a.score || (a.ts||0)-(b.ts||0));
+      lbStatus.textContent = `Top ${Math.min(10,arr.length)} (online)`;
+      updateLBUI(arr.slice(0,10));
+    } catch(e){
+      lbStatus.textContent = 'Offline — showing sample scores.';
+      updateLBUI(FALLBACK);
+    }
+  }
+
+  function updateLBUI(list){
+    lbBody.innerHTML = '';
+    list.slice(0,10).forEach((e,i)=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td class="mono" style="opacity:.8">${i+1}</td>
+        <td>${escapeHTML(e.name)}</td>
+        <td class="mono">${e.score}</td>
+        <td class="mono" style="opacity:.8">${e.ts?ago(e.ts):'—'}</td>`;
+      lbBody.appendChild(tr);
+    });
+  }
+
+  function escapeHTML(s){ return String(s).replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+
+  async function saveScoreOnline(name, score){
+    const entry = { name, score: score|0, ts: Date.now() };
+    const r = await fetch(`${DB_BASE}/leaderboard.json`, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify(entry)
+    });
+    if (!r.ok) throw new Error('save failed');
+    return await r.json();
+  }
+
+  function defaultPlayerName(){
+    return 'Player' + Math.floor(100 + Math.random()*900);
+  }
+
+  leaderBtn.addEventListener('click', async ()=>{
+    lbOverlay.style.display='grid';
+    await loadLeaderboard();
+  });
+  overLBBtn.addEventListener('click', async ()=>{
+    lbOverlay.style.display='grid';
+    await loadLeaderboard();
+  });
+  lbRefresh.addEventListener('click', loadLeaderboard);
+  lbClose.addEventListener('click', ()=>{ lbOverlay.style.display='none'; });
+
+  saveBtn.addEventListener('click', async ()=>{
+    const name = (nameInput.value || '').trim().slice(0,16) || defaultPlayerName();
+    localStorage.setItem('hdName', name);
+    const score = Math.floor(state.score);
+    saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; saveMsg.textContent = '';
+    try {
+      await saveScoreOnline(name, score);
+      saveBtn.textContent = 'Saved!';
+      saveMsg.textContent = 'Score saved to leaderboard.';
+    } catch(e){
+      saveBtn.textContent = 'Save Score';
+      saveBtn.disabled = false;
+      saveMsg.textContent = 'Could not save (offline?). Try again later.';
+    }
+  });
 
   // Init
   resizeCanvas();
